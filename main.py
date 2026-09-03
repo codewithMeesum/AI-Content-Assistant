@@ -91,15 +91,34 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # Production supported models on Groq
-    model_option = st.selectbox(
-        "Base Architecture",
-        (
+    # Dynamic model discovery: Query what this specific key has access to
+    available_models = []
+    if groq_api_key:
+        try:
+            client_probe = Groq(api_key=groq_api_key)
+            models_data = client_probe.models.list()
+            # Filter out non-chat models (audio, moderation, guardrails)
+            for m in models_data.data:
+                mid = m.id.lower()
+                if not any(skip in mid for skip in ["whisper", "guard", "safeguard", "orpheus"]):
+                    available_models.append(m.id)
+        except Exception:
+            available_models = []
+
+    # Safe fallbacks if key is not yet provided or lookup is rate-limited
+    if not available_models:
+        available_models = [
             "llama-3.1-8b-instant",
             "llama-3.3-70b-versatile",
-        ),
+            "openai/gpt-oss-20b",
+            "mixtral-8x7b-32768",
+        ]
+
+    model_option = st.selectbox(
+        "Active Model",
+        available_models,
         index=0,
-        help="llama-3.1-8b-instant provides high speed; llama-3.3-70b-versatile provides maximum depth.",
+        help="Populated from your Groq account's active catalog.",
     )
 
     col_s1, col_s2 = st.columns(2)
@@ -189,7 +208,7 @@ Guidelines:
             start_time = time.time()
 
             try:
-                with st.spinner("Compiling copy with Groq..."):
+                with st.spinner(f"Compiling copy using {model_option}..."):
                     stream = client.chat.completions.create(
                         model=model_option,
                         messages=[
@@ -208,14 +227,13 @@ Guidelines:
 
                     response_box.markdown(accumulator)
 
-                # Persist completed state cleanly without force rerun
                 st.session_state.generated_content = accumulator
                 st.session_state.generation_time = round(time.time() - start_time, 2)
 
             except Exception as err:
                 st.error(f"Inference Failure: {err}")
 
-    # Render output tools if content is available
+    # Display content tabs and export tools
     if st.session_state.generated_content:
         tab_preview, tab_raw = st.tabs(["Formatted Preview", "Markdown Raw"])
 
@@ -231,7 +249,6 @@ Guidelines:
                 label_visibility="collapsed",
             )
 
-        # Content Metrics Bar
         word_count = len(st.session_state.generated_content.split())
         char_count = len(st.session_state.generated_content)
 
@@ -240,7 +257,6 @@ Guidelines:
         m2.metric("Characters", f"{char_count:,}")
         m3.metric("Latency", f"{st.session_state.generation_time}s")
 
-        # Utility Download Actions
         col_dl1, col_dl2 = st.columns(2)
         with col_dl1:
             st.download_button(
