@@ -11,13 +11,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ----------------- Modern SaaS UI / UX Styling -----------------
+# ----------------- Clean SaaS UI / UX Styling -----------------
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-    /* Global Foundation */
     * {
         font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
     }
@@ -27,7 +26,6 @@ st.markdown(
         color: #0f172a !important;
     }
 
-    /* Constrain Width for Optimal Proportions */
     .block-container {
         max-width: 1240px !important;
         padding-top: 1.5rem !important;
@@ -39,7 +37,7 @@ st.markdown(
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0.75rem 0 1.5rem 0;
+        padding: 0.75rem 0 1.25rem 0;
         margin-bottom: 1.5rem;
         border-bottom: 1px solid #e2e8f0;
     }
@@ -61,7 +59,7 @@ st.markdown(
         border-radius: 9999px;
     }
 
-    /* Enforce High Contrast on All Input Elements */
+    /* Contrast-Safe Labels & Inputs */
     label p {
         font-weight: 600 !important;
         color: #334155 !important;
@@ -126,7 +124,7 @@ st.markdown(
         box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15) !important;
     }
 
-    /* Custom Output Workspace Box */
+    /* Output Workspace Canvas */
     .editor-canvas {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -155,7 +153,7 @@ st.markdown(
         padding: 2rem;
     }
 
-    /* Metadata Badge */
+    /* Stat Badges */
     .stat-badge {
         display: inline-flex;
         align-items: center;
@@ -185,10 +183,10 @@ st.markdown(
     <div class="app-header">
         <div class="brand-title">
             <span>✦ Nexus AI</span>
-            <span class="badge-pill">Content Assistant</span>
+            <span class="badge-pill">Content Studio</span>
         </div>
         <div style="font-size: 0.85rem; color: #64748b; font-weight: 500;">
-            Powered by Groq LPUs
+            Ultra-fast Groq Inference
         </div>
     </div>
     """,
@@ -207,23 +205,25 @@ with st.sidebar:
             placeholder="gsk_...",
             help="Enter your key from console.groq.com",
         )
+    else:
+        st.success("API Key loaded securely", icon="🔒")
 
-    # Fetch available models or provide reliable defaults
-    active_models = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
-    if groq_api_key:
-        try:
-            client_probe = Groq(api_key=groq_api_key)
-            fetched = [
-                m.id for m in client_probe.models.list().data
-                if not any(x in m.id for x in ["whisper", "guard", "vision"])
-            ]
-            if fetched:
-                active_models = fetched
-        except Exception:
-            pass
+    # Whitelist verified text models to prevent audio/voice terms-acceptance crashes
+    TEXT_MODELS = [
+        "llama-3.3-70b-versatile",
+        "llama-3.1-8b-instant",
+        "mixtral-8x7b-32768",
+        "gemma2-9b-it",
+    ]
 
-    selected_model = st.selectbox("Model", active_models, index=0)
-    temperature = st.slider("Creativity", 0.0, 1.0, 0.7, 0.05)
+    selected_model = st.selectbox(
+        "Active Model",
+        TEXT_MODELS,
+        index=0,
+        help="llama-3.3-70b gives the highest quality copy; 8b provides near-zero latency.",
+    )
+
+    temperature = st.slider("Creativity (Temp)", 0.0, 1.0, 0.7, 0.05)
 
 # ----------------- Two-Column Workspace -----------------
 col_editor, col_preview = st.columns([1.05, 1.15], gap="large")
@@ -231,7 +231,7 @@ col_editor, col_preview = st.columns([1.05, 1.15], gap="large")
 with col_editor:
     with st.container(border=True):
         st.markdown("##### 📝 Create Content")
-        st.caption("Configure format, define audience, and provide rough context.")
+        st.caption("Configure format, tone, and provide rough context.")
 
         format_type = st.pills(
             "Format",
@@ -243,7 +243,13 @@ with col_editor:
         with sub_c1:
             tone = st.selectbox(
                 "Tone & Style",
-                ["Authoritative & Insightful", "Conversational", "Punchy & Direct", "Educational", "Story-driven"],
+                [
+                    "Authoritative & Insightful",
+                    "Conversational",
+                    "Punchy & Direct",
+                    "Educational",
+                    "Story-driven",
+                ],
             )
         with sub_c2:
             audience = st.text_input(
@@ -259,7 +265,7 @@ with col_editor:
         topic = st.text_area(
             "Topic & Raw Notes",
             placeholder="Paste rough notes, outline, or thesis...",
-            height=170,
+            height=180,
         )
 
         generate_clicked = st.button("Generate Content ✦", type="primary", use_container_width=True)
@@ -278,14 +284,14 @@ with col_preview:
         else:
             client = Groq(api_key=groq_api_key)
             system_prompt = f"""
-You are an expert copywriter. Write a clean, high-performing {format_type}.
+You are an expert copywriter and content strategist. Write a clean, high-performing {format_type}.
 - Tone: {tone}
 - Target Audience: {audience if audience else "General professional"}
 - Key Anchors: {keywords if keywords else "None specified"}
 
 Rules:
-1. Deliver production-ready copy with great typographic structure, hooks, and clean spacing.
-2. Absolutely do NOT include introductory meta-announcements (e.g., 'Here is your post:'). Jump immediately into the copy.
+1. Deliver production-ready copy with clear structural scaffolding, hooks, and clean spacing.
+2. Under no circumstances should you include introductory meta-commentary (e.g., 'Here is your post:'). Jump straight into the draft.
 """
             accumulated = ""
             start_time = time.time()
@@ -320,7 +326,6 @@ Rules:
                 st.error(f"Inference error: {e}")
 
     elif st.session_state.content:
-        # Display existing content inside styled card
         output_area.markdown(
             f'<div class="editor-canvas">{st.session_state.content}</div>',
             unsafe_allow_html=True,
