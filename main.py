@@ -59,7 +59,7 @@ st.markdown(
         border-radius: 9999px;
     }
 
-    /* Contrast-Safe Labels & Inputs */
+    /* High-Contrast Labels & Inputs */
     label p {
         font-weight: 600 !important;
         color: #334155 !important;
@@ -208,19 +208,19 @@ with st.sidebar:
     else:
         st.success("API Key loaded securely", icon="🔒")
 
-    # Whitelist verified text models to prevent audio/voice terms-acceptance crashes
+    # Models verified to work without 404s or terms acceptance blocks
     TEXT_MODELS = [
-        "llama-3.3-70b-versatile",
-        "llama-3.1-8b-instant",
+        "groq/compound-mini",
+        "llama3-70b-8192",
+        "llama3-8b-8192",
         "mixtral-8x7b-32768",
-        "gemma2-9b-it",
     ]
 
     selected_model = st.selectbox(
         "Active Model",
         TEXT_MODELS,
         index=0,
-        help="llama-3.3-70b gives the highest quality copy; 8b provides near-zero latency.",
+        help="Models verified and active on your Groq project tier.",
     )
 
     temperature = st.slider("Creativity (Temp)", 0.0, 1.0, 0.7, 0.05)
