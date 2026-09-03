@@ -3,319 +3,368 @@ import time
 import streamlit as st
 from groq import Groq
 
-# ----------------- Page Configuration -----------------
+# ----------------- Page Setup -----------------
 st.set_page_config(
-    page_title="AI Content Studio",
-    page_icon="✨",
+    page_title="Nexus | AI Content Studio",
+    page_icon="✦",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# ----------------- High-End SaaS Custom CSS -----------------
+# ----------------- Modern SaaS UI / UX Styling -----------------
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-    /* Global typography and background */
-    html, body, [class*="css"] {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        color: #0f172a;
+    /* Global Foundation */
+    * {
+        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
     }
     
     .stApp {
-        background-color: #f8fafc;
+        background-color: #f8fafc !important;
+        color: #0f172a !important;
     }
 
-    /* Remove Streamlit default padding */
+    /* Constrain Width for Optimal Proportions */
     .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        max-width: 1200px;
+        max-width: 1240px !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 3rem !important;
     }
 
-    /* Minimalist Navbar */
-    .nav-bar {
+    /* Fixed Clean Navigation Bar */
+    .app-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding-bottom: 1.25rem;
+        justify-content: space-between;
+        padding: 0.75rem 0 1.5rem 0;
+        margin-bottom: 1.5rem;
         border-bottom: 1px solid #e2e8f0;
-        margin-bottom: 2rem;
     }
-    .brand-logo {
+    .brand-title {
         font-size: 1.25rem;
         font-weight: 700;
-        letter-spacing: -0.02em;
         color: #0f172a;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        letter-spacing: -0.02em;
     }
-    .brand-badge {
-        font-size: 0.75rem;
-        font-weight: 600;
-        background: #f1f5f9;
+    .badge-pill {
+        background: #e2e8f0;
         color: #475569;
+        font-size: 0.72rem;
+        font-weight: 600;
         padding: 0.2rem 0.55rem;
         border-radius: 9999px;
-        border: 1px solid #e2e8f0;
     }
 
-    /* Clean Card Containers */
-    div[data-testid="stVerticalBlock"] > div:has(> div.card-wrapper) {
-        background: #ffffff;
-        border-radius: 16px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
-        padding: 1.5rem;
+    /* Enforce High Contrast on All Input Elements */
+    label p {
+        font-weight: 600 !important;
+        color: #334155 !important;
+        font-size: 0.85rem !important;
+        margin-bottom: 0.35rem !important;
     }
 
-    .panel-title {
-        font-size: 1.05rem;
-        font-weight: 600;
-        color: #0f172a;
-        margin-bottom: 0.25rem;
-    }
-    .panel-subtitle {
-        font-size: 0.85rem;
-        color: #64748b;
-        margin-bottom: 1.2rem;
-    }
-
-    /* Custom Streamlit Input Styles */
-    .stTextInput input, .stTextArea textarea, .stSelectbox [data-baseweb="select"] {
-        border-radius: 8px !important;
-        border: 1px solid #e2e8f0 !important;
-        background: #ffffff !important;
+    .stTextInput input, 
+    .stTextArea textarea {
+        background-color: #ffffff !important;
         color: #0f172a !important;
-        font-size: 0.9rem !important;
-        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        font-size: 0.92rem !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
     }
 
-    .stTextInput input:focus, .stTextArea textarea:focus {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 1px #3b82f6 !important;
+    .stTextInput input::placeholder, 
+    .stTextArea textarea::placeholder {
+        color: #94a3b8 !important;
     }
 
-    /* Primary Button */
+    .stTextInput input:focus, 
+    .stTextArea textarea:focus {
+        border-color: #2563eb !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+    }
+
+    /* Selectbox styling */
+    div[data-baseweb="select"] {
+        border-radius: 8px !important;
+    }
+    div[data-baseweb="select"] > div {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        border-radius: 8px !important;
+    }
+
+    /* Pill Selection Restyle */
+    div[data-testid="stPills"] button {
+        border-radius: 20px !important;
+        font-size: 0.85rem !important;
+        font-weight: 500 !important;
+        padding: 0.35rem 0.85rem !important;
+    }
+
+    /* Primary CTA Button */
     div.stButton > button[kind="primary"] {
-        background: #0f172a !important;
+        background-color: #0f172a !important;
         color: #ffffff !important;
         border-radius: 8px !important;
-        border: none !important;
         font-weight: 600 !important;
         font-size: 0.95rem !important;
-        padding: 0.65rem 1.25rem !important;
-        transition: all 0.15s ease !important;
+        border: none !important;
+        padding: 0.65rem 1rem !important;
+        transition: all 0.15s ease-in-out !important;
     }
     div.stButton > button[kind="primary"]:hover {
-        background: #1e293b !important;
+        background-color: #1e293b !important;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15) !important;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15) !important;
     }
 
-    /* Clean Output Box */
-    .output-box {
+    /* Custom Output Workspace Box */
+    .editor-canvas {
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
         padding: 1.5rem;
-        min-height: 420px;
-        line-height: 1.65;
+        min-height: 480px;
+        line-height: 1.7;
         font-size: 0.95rem;
         color: #1e293b;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    
+    .editor-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 480px;
+        color: #94a3b8;
+        border: 1.5px dashed #cbd5e1;
+        border-radius: 12px;
+        background: #f8fafc;
+        text-align: center;
+        padding: 2rem;
     }
 
-    /* Metric Badges */
+    /* Metadata Badge */
     .stat-badge {
         display: inline-flex;
         align-items: center;
-        gap: 0.35rem;
-        font-size: 0.8rem;
-        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #475569;
         background: #f1f5f9;
-        padding: 0.25rem 0.6rem;
+        border: 1px solid #e2e8f0;
         border-radius: 6px;
-        margin-right: 0.5rem;
-        font-weight: 500;
+        padding: 0.25rem 0.55rem;
+        margin-right: 0.4rem;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# ----------------- State Management -----------------
+# ----------------- Session State -----------------
 if "content" not in st.session_state:
     st.session_state.content = ""
-if "generation_time" not in st.session_state:
-    st.session_state.generation_time = 0.0
+if "latency" not in st.session_state:
+    st.session_state.latency = 0.0
 
-# ----------------- Top Header Navigation -----------------
+# ----------------- Top Navigation -----------------
 st.markdown(
     """
-    <div class="nav-bar">
-        <div class="brand-logo">
-            <span>⚡ ContentCraft</span>
-            <span class="brand-badge">Lite Edition</span>
+    <div class="app-header">
+        <div class="brand-title">
+            <span>✦ Nexus AI</span>
+            <span class="badge-pill">Content Assistant</span>
         </div>
         <div style="font-size: 0.85rem; color: #64748b; font-weight: 500;">
-            Ultra-fast Groq Inference
+            Powered by Groq LPUs
         </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-# ----------------- API Key & Model Configuration -----------------
+# ----------------- Sidebar Configuration -----------------
 groq_api_key = st.secrets.get("GROQ_API_KEY", "")
 
 with st.sidebar:
-    st.markdown("### ⚙️ Engine")
+    st.markdown("### ⚙️ Engine Settings")
     if not groq_api_key:
-        groq_api_key = st.text_input("Groq Key", type="password", placeholder="gsk_...")
+        groq_api_key = st.text_input(
+            "Groq API Key",
+            type="password",
+            placeholder="gsk_...",
+            help="Enter your key from console.groq.com",
+        )
 
-    # Dynamic model fetch to prevent 404s
-    models = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
+    # Fetch available models or provide reliable defaults
+    active_models = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
     if groq_api_key:
         try:
             client_probe = Groq(api_key=groq_api_key)
             fetched = [
-                m.id for m in client_probe.models.list().data 
+                m.id for m in client_probe.models.list().data
                 if not any(x in m.id for x in ["whisper", "guard", "vision"])
             ]
             if fetched:
-                models = fetched
+                active_models = fetched
         except Exception:
             pass
 
-    selected_model = st.selectbox("Model", models, index=0)
-    temperature = st.slider("Temperature", 0.0, 1.0, 0.7, 0.05)
+    selected_model = st.selectbox("Model", active_models, index=0)
+    temperature = st.slider("Creativity", 0.0, 1.0, 0.7, 0.05)
 
-# ----------------- Main Workspace -----------------
-left_col, right_col = st.columns([1, 1.15], gap="large")
+# ----------------- Two-Column Workspace -----------------
+col_editor, col_preview = st.columns([1.05, 1.15], gap="large")
 
-with left_col:
-    st.markdown('<div class="card-wrapper">', unsafe_allow_html=True)
-    st.markdown('<div class="panel-title">Create New Draft</div>', unsafe_allow_html=True)
-    st.markdown('<div class="panel-subtitle">Select format, tune style, and generate conversion-ready copy.</div>', unsafe_allow_html=True)
+with col_editor:
+    with st.container(border=True):
+        st.markdown("##### 📝 Create Content")
+        st.caption("Configure format, define audience, and provide rough context.")
 
-    format_choice = st.pills(
-        "Format",
-        ["LinkedIn", "X Thread", "Newsletter", "Blog Post", "Video Script"],
-        default="LinkedIn",
-        label_visibility="collapsed",
-    )
-
-    c1, c2 = st.columns(2)
-    with c1:
-        tone_choice = st.selectbox(
-            "Tone",
-            ["Authoritative", "Conversational", "Punchy & Direct", "Educational", "Story-driven"],
+        format_type = st.pills(
+            "Format",
+            ["LinkedIn", "X Thread", "Newsletter", "Blog Post", "Video Script"],
+            default="LinkedIn",
         )
-    with c2:
-        audience_choice = st.text_input("Target Audience", placeholder="e.g., Tech founders, Devs")
 
-    topic_prompt = st.text_area(
-        "Key Notes or Outline",
-        placeholder="Paste bullets, rough points, or raw thoughts...",
-        height=180,
-    )
+        sub_c1, sub_c2 = st.columns(2)
+        with sub_c1:
+            tone = st.selectbox(
+                "Tone & Style",
+                ["Authoritative & Insightful", "Conversational", "Punchy & Direct", "Educational", "Story-driven"],
+            )
+        with sub_c2:
+            audience = st.text_input(
+                "Target Audience",
+                placeholder="e.g. Founders, Tech leads, Students",
+            )
 
-    generate_btn = st.button("Generate Content ✦", type="primary", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+        keywords = st.text_input(
+            "Keywords / Anchors (Optional)",
+            placeholder="e.g. AI tools, productivity, speed",
+        )
 
-with right_col:
-    st.markdown('<div class="panel-title">Editor Workspace</div>', unsafe_allow_html=True)
-    st.markdown('<div class="panel-subtitle">Streamed copy ready to review, tweak, and export.</div>', unsafe_allow_html=True)
+        topic = st.text_area(
+            "Topic & Raw Notes",
+            placeholder="Paste rough notes, outline, or thesis...",
+            height=170,
+        )
 
-    if generate_btn:
+        generate_clicked = st.button("Generate Content ✦", type="primary", use_container_width=True)
+
+with col_preview:
+    st.markdown("##### 📄 Output Workspace")
+    st.caption("Review, edit, and export your generated copy.")
+
+    output_area = st.empty()
+
+    if generate_clicked:
         if not groq_api_key:
-            st.error("Please add your Groq API key in the sidebar or secrets.")
-        elif not topic_prompt.strip():
-            st.warning("Please enter your notes or outline first.")
+            st.error("Missing Groq API Key. Add it to secrets or sidebar.")
+        elif not topic.strip():
+            st.warning("Please provide context or raw notes before generating.")
         else:
-            system_msg = f"""
-You are an expert copywriter. Write a high-converting, exceptionally engaging {format_choice}.
-- Tone: {tone_choice}
-- Target Audience: {audience_choice if audience_choice else 'General professionals'}
-- Rule: Deliver polished copy immediately. No conversational preamble ('Here is your post:').
-"""
             client = Groq(api_key=groq_api_key)
-            output_holder = st.empty()
+            system_prompt = f"""
+You are an expert copywriter. Write a clean, high-performing {format_type}.
+- Tone: {tone}
+- Target Audience: {audience if audience else "General professional"}
+- Key Anchors: {keywords if keywords else "None specified"}
+
+Rules:
+1. Deliver production-ready copy with great typographic structure, hooks, and clean spacing.
+2. Absolutely do NOT include introductory meta-announcements (e.g., 'Here is your post:'). Jump immediately into the copy.
+"""
             accumulated = ""
-            start_t = time.time()
+            start_time = time.time()
 
             try:
                 stream = client.chat.completions.create(
                     model=selected_model,
                     messages=[
-                        {"role": "system", "content": system_msg},
-                        {"role": "user", "content": topic_prompt},
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": topic},
                     ],
                     temperature=temperature,
                     stream=True,
                 )
+
                 for chunk in stream:
                     delta = chunk.choices[0].delta.content or ""
                     accumulated += delta
-                    output_holder.markdown(
-                        f'<div class="output-box">{accumulated}▌</div>',
+                    output_area.markdown(
+                        f'<div class="editor-canvas">{accumulated}▌</div>',
                         unsafe_allow_html=True,
                     )
 
                 st.session_state.content = accumulated
-                st.session_state.generation_time = round(time.time() - start_t, 2)
-                output_holder.markdown(
-                    f'<div class="output-box">{accumulated}</div>',
+                st.session_state.latency = round(time.time() - start_time, 2)
+                output_area.markdown(
+                    f'<div class="editor-canvas">{accumulated}</div>',
                     unsafe_allow_html=True,
                 )
+
             except Exception as e:
-                st.error(f"Generation error: {e}")
+                st.error(f"Inference error: {e}")
 
     elif st.session_state.content:
-        # Display saved content in clean container
-        st.markdown(
-            f'<div class="output-box">{st.session_state.content}</div>',
+        # Display existing content inside styled card
+        output_area.markdown(
+            f'<div class="editor-canvas">{st.session_state.content}</div>',
             unsafe_allow_html=True,
         )
 
-        # Meta & Quick Export Actions
         words = len(st.session_state.content.split())
         chars = len(st.session_state.content)
-        
+
         st.markdown(
             f"""
-            <div style="margin-top: 1rem; margin-bottom: 1rem;">
+            <div style="margin-top: 0.85rem; margin-bottom: 0.85rem;">
                 <span class="stat-badge">📝 {words} words</span>
                 <span class="stat-badge">🔤 {chars} chars</span>
-                <span class="stat-badge">⚡ {st.session_state.generation_time}s</span>
+                <span class="stat-badge">⚡ {st.session_state.latency}s</span>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        b1, b2 = st.columns(2)
-        with b1:
+        btn_col1, btn_col2 = st.columns(2)
+        with btn_col1:
             st.download_button(
-                label="Copy / Download Markdown",
+                label="📥 Download Markdown",
                 data=st.session_state.content,
-                file_name="content.md",
+                file_name="draft.md",
                 mime="text/markdown",
                 use_container_width=True,
             )
-        with b2:
+        with btn_col2:
             st.download_button(
-                label="Download Plain Text",
+                label="📄 Download Plain Text",
                 data=st.session_state.content,
-                file_name="content.txt",
+                file_name="draft.txt",
                 mime="text/plain",
                 use_container_width=True,
             )
     else:
-        st.markdown(
-            '<div class="output-box" style="display:flex; align-items:center; justify-content:center; color:#94a3b8;">'
-            'Your generated copy will appear here live.'
-            '</div>',
+        output_area.markdown(
+            """
+            <div class="editor-placeholder">
+                <span style="font-size: 1.8rem; margin-bottom: 0.5rem;">✦</span>
+                <div style="font-weight: 600; font-size: 0.95rem; color: #64748b;">Ready for Creation</div>
+                <div style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.2rem;">Configure your prompt on the left and hit generate.</div>
+            </div>
+            """,
             unsafe_allow_html=True,
         )
