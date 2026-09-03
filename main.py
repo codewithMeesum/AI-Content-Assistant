@@ -21,7 +21,6 @@ st.markdown(
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
     
-    /* Top Banner Styling */
     .hero-container {
         padding: 1.5rem 1.8rem;
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -43,16 +42,6 @@ st.markdown(
         margin: 0;
     }
 
-    /* Output Card */
-    .output-container {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-top: 1rem;
-    }
-
-    /* Button Polish */
     .stButton>button {
         border-radius: 8px;
         font-weight: 600;
@@ -72,8 +61,6 @@ if "generated_content" not in st.session_state:
     st.session_state.generated_content = ""
 if "generation_time" not in st.session_state:
     st.session_state.generation_time = 0.0
-if "last_params" not in st.session_state:
-    st.session_state.last_params = {}
 
 # ----------------- Hero Banner -----------------
 st.markdown(
@@ -104,11 +91,15 @@ with st.sidebar:
 
     st.markdown("---")
 
+    # Production supported models on Groq
     model_option = st.selectbox(
         "Base Architecture",
-        ("llama-3.3-70b-versatile", "llama-3.1-8b-instant"),
+        (
+            "llama-3.1-8b-instant",
+            "llama-3.3-70b-versatile",
+        ),
         index=0,
-        help="Use 70B for nuanced writing; 8B for raw speed.",
+        help="llama-3.1-8b-instant provides high speed; llama-3.3-70b-versatile provides maximum depth.",
     )
 
     col_s1, col_s2 = st.columns(2)
@@ -118,7 +109,7 @@ with st.sidebar:
         max_tokens = st.slider("Max Tokens", 256, 4096, 1500, 128)
 
     st.markdown("---")
-    st.caption("Nexus Content Assistant v2.0 • Powered by Llama 3 & Groq LPUs")
+    st.caption("Nexus Content Assistant • Powered by Groq LPUs")
 
 # ----------------- Workspace Layout -----------------
 left_col, right_col = st.columns([1.1, 1.2], gap="large")
@@ -190,7 +181,7 @@ Guidelines:
 1. Tone: {tone}.
 2. Integrated Keywords/Phrases: {keywords if keywords else "None"}.
 3. Formatting: Use strong hooks, clean typographic spacing, bold headers, and structured bullets.
-4. Output standard: Production-ready copy only. No conversational meta-commentary (do not say "Here is your post:").
+4. Output standard: Production-ready copy only. No conversational meta-commentary (do not start with 'Here is your post:').
 """
 
             response_box = st.empty()
@@ -217,20 +208,14 @@ Guidelines:
 
                     response_box.markdown(accumulator)
 
-                # Persist state
+                # Persist completed state cleanly without force rerun
                 st.session_state.generated_content = accumulator
                 st.session_state.generation_time = round(time.time() - start_time, 2)
-                st.session_state.last_params = {
-                    "format": content_type,
-                    "tone": tone,
-                    "model": model_option,
-                }
-                st.rerun()
 
             except Exception as err:
                 st.error(f"Inference Failure: {err}")
 
-    # Display persisted content tabs if available
+    # Render output tools if content is available
     if st.session_state.generated_content:
         tab_preview, tab_raw = st.tabs(["Formatted Preview", "Markdown Raw"])
 
@@ -273,5 +258,5 @@ Guidelines:
                 mime="text/plain",
                 use_container_width=True,
             )
-    else:
+    elif not generate_btn:
         st.info("Your generated output will appear here with live streaming, analytics, and download options.")
